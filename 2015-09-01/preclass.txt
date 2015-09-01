@@ -11,12 +11,28 @@ with questions for class!
     you computed this, and give URLs for where you got the parameters
     in your calculation.  (We will return to this question again after
     we cover some computer architecture.)
+
+    Intel Xeon Phi peak double precision FLOPS:
+    16 flops/clock * 60 cores *1.053 GHz = 1010.88Gf/s
+
+    96 cores and 15 accelerators result in:
+    96(120) + 15(1010.88) = 26683.2 GF/s
     
 2.  What is the approximate theoretical peak flop rate for your own machine?
+
+    My machine stats - Macbook Pro (2011) 2.8 GHz Intel Core i7
+    theoretical peak flop rate = Number of Cores * Average frequency * Operations per cycle
+			       = 4 * 2.8GHz * 16
+			       = 179.2 GF/s
 
 3.  Suppose there are t tasks that can be executed in a pipeline
     with p stages.  What is the speedup over serial execution of the
     same tasks?
+	Suppose each task takes time T
+	For serial execution -> Tserial = p * T
+	For pipeline -> Tpipe = (p-1)*T + n*T
+	speedup = Tserial/Tpipe = t*p/(p-1+t)
+
 
 4.  Consider the following list of tasks (assume they can't be pipelined):
 
@@ -31,6 +47,13 @@ with questions for class!
     a compiled application?  What is the minimum parallel time given
     an arbitrary number of processors?
 
+    Serial time = 1 + 0.5 + 0.25 + 0.5 + 0.5 = 2.75 hr
+    Parallel time ->
+	OpenMPI and OpenBLAS both only depend on GCC so they can be parallelized.
+	compile LAPACK once OpenBLAS is done
+	compile application once OpenMPI is done
+	= 1(GCC) + 0.5(OpenMPI) + 0.5(application) = 2hr
+
 5.  Clone the membench repository from GitHub:
 
        git clone git@github.com:cornell-cs5220-f15/membench.git
@@ -42,6 +65,8 @@ with questions for class!
     in the leading comments of the Makefile).  Look at the output file
     timings-heat.pdf; what can you tell about the cache architecture
     on your machine from the plot?
+
+    Got an error (omp.h not found) on my Mac. Will try again after class.
 
 6.  From the cloned repository, check out the totient branch:
 
