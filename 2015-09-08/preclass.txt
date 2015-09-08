@@ -1,5 +1,10 @@
 Pre-Class Questions:
 
+Dips at 2^n in the figure is because of set associativity (8 way)
+last few bits of address - map to same set of cache line but there are only 8 of them so you have to look through them all.
+
+Have better arithmetic intensity by multiplying 4x4 blocks rather than the naive implementation.
+
 Consider the following naive row-based N x N matmul (matrix multiplication):
 
 for (i = 0; i < N; i++){
@@ -21,28 +26,43 @@ something into an already-full cache.
 1. Suppose 16N is significantly larger than the size of our L3 cache. What is
 the memory-based AI of this code? (Hint: What is the memory-based AI of just the
 innermost loop?)
+double precision = 8 bytes
+L3 = 4Mb
 
+case 1 10x0.5 million * 0.5millionx10 cache size can’t accommodate 1 row. AI = 1 (by the time you get through inner loop, you’ve trashed your cache so no reuse in either loops) 2 flops (1 multiplication and 1 addition). AI - operations/byte loaded would be 1/8. AI - operations per double is 1.
 
 2. Now suppose that the cache is substantially larger than 16N, but
 substantially smaller than 8N^2. What is the AI now?
 
+case 2 1000x1000 * 1000x1000 can accommodate a few rows but not entire matrix AI = 2. You have to load B element each time but A element exists from last time. 1 cache miss and 2 flops. 1/4 flops/byte
 
 3. Now suppose the cache is large enough to hold all of A, B, and C. What is the
 AI now? (Hint: Writing to a byte of memory not already in the cache incurs two
 memory transfers: one to move the data to the cache for writing, and one to move
 the written data back to main memory.)
 
+case 3 10x10 * 10x10 can accommodate the entire matrix AI = N .2N^3 double precision. N/8 flops/bytes transferred. 2N^2 matrix.
 
 4. Cache overflowing. On my CPU (Intel i7-4700 HQ), L1, L2, and L3 caches are 32
 KB, 256 KB, and 6 MB respectively. What is the largest problem size N that will
 fit in each cache? What is the arithmetic intensity associated with each problem
 size?
 
+How big can my matrix be to be in the last case? (Problem 4)
+8MB L3 cache. 
+2^20 double precision numbers. 
+1) Everything to fit in cache. Divide cache int 3 pieces (A B C) sqrt(million/3)
+2) Write to each entry in C once. Really only need A and B. Divide cache into 2. sqrt(million/2)
+3) Only thing to keep is B. sqrt(cache size)
+
+Depends on access patterns are being used.
 
 5. My CPU has 4 cores, each of which can do 8 fused multiply-adds per cycle, has
 a clock rate of 2.4 GHz, and a memory bandwidth of 25.6 GB/s. At what arithmetic
 intensity does my machine become CPU-bound?
 
+4 cores x 8 FMA x 2.4GHz = 7.68x10^10
+AI = (7.68x10^10/25.6GB/s)  = 2.8
 
 6. So, for what size range for N will naive matmul be CPU-bound on my machine?
 
